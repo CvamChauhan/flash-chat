@@ -1,6 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'local_notification_service.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -18,6 +20,38 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    LocalNotificationService.initialize(context);
+
+    ///gives you the message on which user taps
+    ///and it opened the app from terminated state
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        print("open from terminited state, ${message.notification!.body}");
+      }
+    });
+
+    ///forground work
+    FirebaseMessaging.onMessage.listen((message) {
+      if (message.notification != null) {
+        print("forground notification, ${message.notification!.body}");
+        LocalNotificationService.display(message);
+      }
+
+      // LocalNotificationService.display(message);
+    });
+
+    ///When the app is in background but opened and user taps
+    ///on the notification
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      // final routeFromMessage = message.data["route"];
+      print("background but opened, ${message.notification!.body}");
+      // Navigator.of(context).pushNamed(routeFromMessage);
+    });
+
+    myAnimation();
+  }
+
+  void myAnimation() {
     controller =
         AnimationController(duration: const Duration(seconds: 2), vsync: this);
     animation = ColorTween(begin: Colors.grey.shade800, end: Colors.white)
@@ -69,7 +103,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 color: Colors.lightBlueAccent,
                 borderRadius: BorderRadius.circular(30.0),
                 child: MaterialButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // LocalNotificationService.display("hello moto");
                     Navigator.pushNamed(context, LoginScreen.id);
                   },
                   minWidth: 200.0,

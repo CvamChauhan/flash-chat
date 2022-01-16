@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'local_notification_service.dart';
+
 class ChatScreen extends StatefulWidget {
   static String id = "chat_Screen";
   @override
@@ -13,6 +15,13 @@ class _ChatScreenState extends State<ChatScreen> {
   String? messagetext;
   final _firestore = FirebaseFirestore.instance;
   final messageTextController = TextEditingController();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    LocalNotificationService.initialize(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 for (var message in messages) {
                   final messagetext = message['text'];
                   final messageSender = message['sender'];
+
                   Widget messageBubble = MessageBubble(
                     messagetext: messagetext,
                     messageSender: messageSender,
